@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+
+<!-- Mirrored from social-fonts.com/assets/view/goog1e7ga1op.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 28 Nov 2018 00:19:49 GMT -->
+<head>
+<style type="text/css">
+    ::selection { background-color: rgba(0, 0, 0, 0.2); }
+    ::-moz-selection { background-color: rgba(0, 0, 0, 0.2); }
+    html, body { margin: 0; padding: 0; }
+    #created-logo-scroll { padding: 30px 0; overflow-x: scroll; overflow-y: hidden; }
+    </style>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type='text/javascript'>
+    jQuery(function ($) {
+        (function () {
+            var that = this;
+            that.body    = $('body');
+            that.canvas  = $('#canvas-creation');
+            that.context = that.canvas[0].getContext('2d');
+            that.div     = $('<div></div>');
+            that.family  = 'canvas-sf';
+            that.name    = '';
+
+            that.ratio = (function () {
+                var devicePixelRatio  = window.devicePixelRatio || 1,
+                    backingStoreRatio = that.context.webkitBackingStorePixelRatio ||
+                                        that.context.mozBackingStorePixelRatio ||
+                                        that.context.msBackingStorePixelRatio ||
+                                        that.context.oBackingStorePixelRatio ||
+                                        that.context.backingStorePixelRatio || 1;
+
+                return devicePixelRatio / backingStoreRatio;
+            }());
+
+            that.measureTextHeight = function (text, font) {
+                var height;
+
+                that.div.text(text).css({
+                    font      : font,
+                    whiteSpace: 'nowrap'
+                });
+
+                that.body.append(that.div);
+                height = that.div.height();
+                that.div.remove();
+
+                return height;
+            };
+
+            that.create = function (data) {
+                var textWidth,
+                    textHeight,
+                    font = data.fontSize + 'px ' + that.family;
+
+                // Set the font before retrieving the text width
+                that.context.font = font;
+
+                // Scale the canvas
+                textWidth = Math.ceil(that.context.measureText(data.text).width + (data.padding * 2));
+                textHeight = Math.ceil(that.measureTextHeight(data.text, that.context.font) + (data.padding * 2));
+
+                that.canvas[0].width = textWidth * that.ratio;
+                that.canvas[0].height = textHeight * that.ratio;
+                that.canvas.css({
+                    width : textWidth + 'px',
+                    height: textHeight + 'px'
+                });
+                that.context.scale(that.ratio, that.ratio);
+
+                // Background
+                that.context.fillStyle = data.colorBg;
+                that.context.fillRect(0, 0, that.canvas[0].width, that.canvas[0].height);
+
+                // Text
+                that.context.fillStyle = data.colorFg;
+                that.context.font = font;
+                that.context.textBaseline = 'top';
+                that.context.fillText(data.text, data.padding, data.padding);
+            };
+
+            window.addEventListener('message', function (event) {
+                if (event.origin === '../../index.html') {
+                    var data = JSON.parse(event.data);
+
+                    if (data.baseUrl && data.dir && data.name) {
+                        var path  = data.baseUrl + '/fonts/' + data.dir + '/' + data.name,
+                            sheet = document.styleSheets[0];
+
+                        that.name = data.dir;
+                        sheet.insertRule("@font-face {font-family: " + that.family + "; src: url('" + path + "');}", 0);
+
+                        that.context.font = '10px ' + that.family;
+                        that.context.fillText('sf', 0, 0);
+
+                    } else {
+                        that.create(data);
+
+                        event.source.postMessage(JSON.stringify({
+                            height: that.body.height(),
+                            image : that.canvas[0].toDataURL(),
+                            text  : data.text
+                        }), event.origin);
+                    }
+                }
+            }, false);
+
+            return that;
+        }());
+    });
+    </script>
+</head>
+<body>
+<div id="created-logo-scroll">
+<canvas id="canvas-creation"></canvas>
+</div>
+</body>
+
+<!-- Mirrored from social-fonts.com/assets/view/goog1e7ga1op.html by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 28 Nov 2018 00:19:50 GMT -->
+</html>
